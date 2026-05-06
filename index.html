@@ -406,6 +406,7 @@ label{
     page-break-inside:avoid;
   }
 }
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </style>
 </head>
 
@@ -1076,119 +1077,106 @@ function clearBrowserData(){
 }
 
 function exportExcel(){
-  const html = `
-  <html>
-  <head>
-    <meta charset="UTF-8">
-    <style>
-      table{
-        border-collapse:collapse;
-        font-family:Arial;
-        font-size:11pt;
+  const data = articles.map(a => ({
+    "Artículo": a.number || "",
+    "Título": a.title || "",
+    "¿Acordado?": a.isAgreed ? "Sí" : "No",
+    "Estado": a.status || "",
+    "Texto vigente": a.currentText || "",
+    "Propuesta empresa": a.companyProposal || "",
+    "Fecha empresa": a.companyDate || "",
+    "Propuesta comité": a.committeeProposal || "",
+    "Fecha comité": a.committeeDate || "",
+    "Acuerdo": a.agreementText || "",
+    "Fecha acuerdo": a.agreementDate || "",
+    "Notas": a.notes || ""
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  ws["!cols"] = [
+    { wch: 18 },
+    { wch: 28 },
+    { wch: 14 },
+    { wch: 18 },
+    { wch: 55 },
+    { wch: 55 },
+    { wch: 16 },
+    { wch: 55 },
+    { wch: 16 },
+    { wch: 55 },
+    { wch: 16 },
+    { wch: 40 }
+  ];
+
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  for(let R = range.s.r; R <= range.e.r; ++R){
+    for(let C = range.s.c; C <= range.e.c; ++C){
+      const cellAddress = XLSX.utils.encode_cell({ r:R, c:C });
+      const cell = ws[cellAddress];
+
+      if(!cell) continue;
+
+      cell.s = cell.s || {};
+      cell.s.alignment = {
+        vertical: "top",
+        wrapText: true
+      };
+
+      cell.s.border = {
+        top: { style: "thin", color: { rgb: "999999" } },
+        bottom: { style: "thin", color: { rgb: "999999" } },
+        left: { style: "thin", color: { rgb: "999999" } },
+        right: { style: "thin", color: { rgb: "999999" } }
+      };
+
+      if(R === 0){
+        cell.s.fill = { fgColor: { rgb: "1F2937" } };
+        cell.s.font = { bold: true, color: { rgb: "FFFFFF" } };
       }
 
-      th{
-        background:#1f2937;
-        color:white;
-        border:1px solid #999;
-        padding:8px;
-        font-weight:bold;
+      if(R > 0){
+        if(C === 2 || C === 3){
+          const agreed = data[R - 1]["¿Acordado?"] === "Sí";
+          cell.s.fill = {
+            fgColor: {
+              rgb: agreed ? "DCFCE7" : "FEE2E2"
+            }
+          };
+          cell.s.font = {
+            color: {
+              rgb: agreed ? "166534" : "991B1B"
+            }
+          };
+        }
+
+        if(C === 5 || C === 6){
+          cell.s.fill = { fgColor: { rgb: "FEE2E2" } };
+          cell.s.font = { color: { rgb: "991B1B" } };
+        }
+
+        if(C === 7 || C === 8){
+          cell.s.fill = { fgColor: { rgb: "DBEAFE" } };
+          cell.s.font = { color: { rgb: "1E40AF" } };
+        }
+
+        if(C === 9 || C === 10){
+          cell.s.fill = { fgColor: { rgb: "DCFCE7" } };
+          cell.s.font = { color: { rgb: "166534" } };
+        }
       }
+    }
+  }
 
-      td{
-        border:1px solid #999;
-        padding:8px;
-        vertical-align:top;
-        mso-number-format:"\\@";
-      }
+  XLSX.utils.book_append_sheet(wb, ws, "Negociación convenio");
 
-      .vigente{
-        background:#f3f4f6;
-        color:#111827;
-      }
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, "negociacion_convenio_" + date + ".xlsx");
 
-      .empresa{
-        background:#fee2e2;
-        color:#991b1b;
-      }
-
-      .comite{
-        background:#dbeafe;
-        color:#1e40af;
-      }
-
-      .acuerdo{
-        background:#dcfce7;
-        color:#166534;
-      }
-
-      .pendiente{
-        background:#fee2e2;
-        color:#991b1b;
-      }
-    </style>
-  </head>
-  <body>
-    <table>
-      <thead>
-        <tr>
-          <th>Artículo</th>
-          <th>Título</th>
-          <th>¿Acordado?</th>
-          <th>Estado</th>
-          <th>Texto vigente</th>
-          <th>Propuesta empresa</th>
-          <th>Fecha empresa</th>
-          <th>Propuesta comité</th>
-          <th>Fecha comité</th>
-          <th>Acuerdo</th>
-          <th>Fecha acuerdo</th>
-          <th>Notas</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        ${articles.map(a => `
-          <tr>
-            <td>${excelCell(a.number)}</td>
-            <td>${excelCell(a.title)}</td>
-            <td class="${a.isAgreed ? "acuerdo" : "pendiente"}">${a.isAgreed ? "Sí" : "No"}</td>
-            <td class="${a.isAgreed ? "acuerdo" : "pendiente"}">${excelCell(a.status)}</td>
-            <td class="vigente">${excelCell(a.currentText)}</td>
-            <td class="empresa">${excelCell(a.companyProposal)}</td>
-            <td class="empresa">${excelCell(a.companyDate)}</td>
-            <td class="comite">${excelCell(a.committeeProposal)}</td>
-            <td class="comite">${excelCell(a.committeeDate)}</td>
-            <td class="acuerdo">${excelCell(a.agreementText)}</td>
-            <td class="acuerdo">${excelCell(a.agreementDate)}</td>
-            <td>${excelCell(a.notes)}</td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  </body>
-  </html>
-  `;
-
-  const blob = new Blob(["\ufeff" + html], {
-    type:"application/vnd.ms-excel;charset=utf-8;"
-  });
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "negociacion_convenio.xls";
-
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  URL.revokeObjectURL(url);
-
-  showSaveStatus("Excel exportado correctamente");
+  showSaveStatus("Excel .xlsx exportado correctamente");
 }
-
 function getArticleLabel(a){
   const n = a.number || "Sin número";
   const t = a.title ? " — " + a.title : "";
