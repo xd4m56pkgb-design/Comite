@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Negociación Convenio — Comité / Empresa / Acuerdos</title>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
 <style>
 :root{
   --bg:#f4f5f7;
@@ -30,7 +32,6 @@
   --pendiente-text:#991b1b;
 
   --dark:#1f2937;
-  --yellow:#fef3c7;
 }
 
 *{
@@ -383,30 +384,6 @@ label{
     width:100%;
   }
 }
-
-@media print{
-  header,
-  .noPrint,
-  button{
-    display:none!important;
-  }
-
-  body{
-    background:white;
-  }
-
-  main{
-    max-width:none;
-    padding:0;
-  }
-
-  .panel,
-  .card{
-    box-shadow:none;
-    page-break-inside:avoid;
-  }
-}
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </style>
 </head>
 
@@ -414,27 +391,20 @@ label{
 
 <header>
   <h1>Negociación del convenio</h1>
-  <p>Índice de artículos: rojo pendiente, verde acordado. Guardado local en el navegador con exportación JSON y Excel.</p>
+  <p>Índice de artículos: rojo pendiente, verde acordado. Exporta a JSON y Excel .xlsx.</p>
 </header>
 
 <main>
 
-<section class="panel noPrint">
+<section class="panel">
   <div class="toolbar">
-    <button class="green" onclick="exportExcel()">Exportar a Excel</button>
-
+    <button class="green" onclick="exportExcel()">Exportar a Excel .xlsx</button>
     <button class="secondary" onclick="saveInBrowser()">Guardar en este navegador</button>
-
     <button class="secondary" onclick="exportJSON()">Descargar JSON</button>
-
     <button class="secondary" onclick="document.getElementById('jsonFile').click()">Cargar JSON</button>
-
     <button class="blue" onclick="addArticle()">Añadir artículo</button>
-
     <button class="yellow" onclick="duplicateCurrentArticle()">Duplicar artículo</button>
-
     <button class="red" onclick="deleteCurrentArticle()">Borrar artículo</button>
-
     <button class="red" onclick="clearBrowserData()">Borrar datos del navegador</button>
 
     <input id="jsonFile" type="file" accept=".json" class="hidden" onchange="importJSON(event)" />
@@ -445,7 +415,7 @@ label{
   </p>
 </section>
 
-<section class="panel noPrint">
+<section class="panel">
   <div class="toolbar">
     <label for="articleSelect" style="margin:0;">Elegir artículo:</label>
 
@@ -531,7 +501,7 @@ label{
 
     <textarea id="companyProposal" placeholder="Escribe aquí la última propuesta de la empresa..." oninput="updateCurrent('companyProposal', this.value)"></textarea>
 
-    <div class="toolbar noPrint" style="margin-top:10px;">
+    <div class="toolbar" style="margin-top:10px;">
       <button class="red" onclick="copyToAgreement('companyProposal')">Pasar empresa a acuerdo</button>
     </div>
   </div>
@@ -544,7 +514,7 @@ label{
 
     <textarea id="committeeProposal" placeholder="Escribe aquí la última propuesta del comité..." oninput="updateCurrent('committeeProposal', this.value)"></textarea>
 
-    <div class="toolbar noPrint" style="margin-top:10px;">
+    <div class="toolbar" style="margin-top:10px;">
       <button class="blue" onclick="copyToAgreement('committeeProposal')">Pasar comité a acuerdo</button>
     </div>
   </div>
@@ -560,7 +530,7 @@ label{
     <div>
       <textarea id="agreementText" placeholder="Escribe aquí el texto acordado final..." oninput="updateCurrent('agreementText', this.value)"></textarea>
 
-      <div class="toolbar noPrint" style="margin-top:10px;">
+      <div class="toolbar" style="margin-top:10px;">
         <button class="green" onclick="markAgreed()">Marcar como acordado</button>
         <button class="red" onclick="markPending()">Marcar como pendiente</button>
       </div>
@@ -586,7 +556,7 @@ label{
 </main>
 
 <script>
-const STORAGE_KEY = "negociacion_convenio_datos_json_local_v1";
+const STORAGE_KEY = "negociacion_convenio_datos_json_local_v2";
 
 let articles = [];
 let currentId = null;
@@ -781,21 +751,7 @@ function renderCurrent(){
   document.getElementById("notesText").value = a.notes || "";
   document.getElementById("quickNotes").value = a.notes || "";
 
-  document.getElementById("screenArticleTitle").innerText = getArticleLabel(a);
-  document.getElementById("screenArticleSubtitle").innerText = "Estado: " + (a.status || "Pendiente") + " · ";
-
-  const badge = document.getElementById("screenAgreementBadge");
-  const agreementCard = document.getElementById("agreementCard");
-
-  if(a.isAgreed){
-    badge.className = "statusBadge ok";
-    badge.innerText = "Acordado";
-    agreementCard.classList.remove("noAcordado");
-  }else{
-    badge.className = "statusBadge no";
-    badge.innerText = "Pendiente";
-    agreementCard.classList.add("noAcordado");
-  }
+  updateScreenHeaderOnly();
 
   const select = document.getElementById("articleSelect");
 
@@ -1077,98 +1033,134 @@ function clearBrowserData(){
 }
 
 function exportExcel(){
-  const data = articles.map(a => ({
-    "Artículo": a.number || "",
-    "Título": a.title || "",
-    "¿Acordado?": a.isAgreed ? "Sí" : "No",
-    "Estado": a.status || "",
-    "Texto vigente": a.currentText || "",
-    "Propuesta empresa": a.companyProposal || "",
-    "Fecha empresa": a.companyDate || "",
-    "Propuesta comité": a.committeeProposal || "",
-    "Fecha comité": a.committeeDate || "",
-    "Acuerdo": a.agreementText || "",
-    "Fecha acuerdo": a.agreementDate || "",
-    "Notas": a.notes || ""
-  }));
+  const headers = [
+    "Artículo",
+    "Título",
+    "¿Acordado?",
+    "Estado",
+    "Texto vigente",
+    "Propuesta empresa",
+    "Fecha empresa",
+    "Propuesta comité",
+    "Fecha comité",
+    "Acuerdo",
+    "Fecha acuerdo",
+    "Notas"
+  ];
+
+  const data = [
+    headers,
+    ...articles.map(a => [
+      a.number || "",
+      a.title || "",
+      a.isAgreed ? "Sí" : "No",
+      a.status || "",
+      a.currentText || "",
+      a.companyProposal || "",
+      a.companyDate || "",
+      a.committeeProposal || "",
+      a.committeeDate || "",
+      a.agreementText || "",
+      a.agreementDate || "",
+      a.notes || ""
+    ])
+  ];
 
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(data);
+  const ws = XLSX.utils.aoa_to_sheet(data);
 
   ws["!cols"] = [
     { wch: 18 },
     { wch: 28 },
     { wch: 14 },
     { wch: 18 },
-    { wch: 55 },
-    { wch: 55 },
+    { wch: 60 },
+    { wch: 60 },
     { wch: 16 },
-    { wch: 55 },
+    { wch: 60 },
     { wch: 16 },
-    { wch: 55 },
+    { wch: 60 },
     { wch: 16 },
-    { wch: 40 }
+    { wch: 45 }
+  ];
+
+  ws["!rows"] = [
+    { hpt: 26 },
+    ...articles.map(() => ({ hpt: 90 }))
   ];
 
   const range = XLSX.utils.decode_range(ws["!ref"]);
 
-  for(let R = range.s.r; R <= range.e.r; ++R){
-    for(let C = range.s.c; C <= range.e.c; ++C){
+  for(let R = range.s.r; R <= range.e.r; R++){
+    for(let C = range.s.c; C <= range.e.c; C++){
       const cellAddress = XLSX.utils.encode_cell({ r:R, c:C });
       const cell = ws[cellAddress];
 
-      if(!cell) continue;
+      if(!cell){
+        continue;
+      }
 
-      cell.s = cell.s || {};
-      cell.s.alignment = {
-        vertical: "top",
-        wrapText: true
-      };
-
-      cell.s.border = {
-        top: { style: "thin", color: { rgb: "999999" } },
-        bottom: { style: "thin", color: { rgb: "999999" } },
-        left: { style: "thin", color: { rgb: "999999" } },
-        right: { style: "thin", color: { rgb: "999999" } }
+      cell.s = {
+        alignment:{
+          vertical:"top",
+          wrapText:true
+        },
+        border:{
+          top:{ style:"thin", color:{ rgb:"999999" } },
+          bottom:{ style:"thin", color:{ rgb:"999999" } },
+          left:{ style:"thin", color:{ rgb:"999999" } },
+          right:{ style:"thin", color:{ rgb:"999999" } }
+        }
       };
 
       if(R === 0){
-        cell.s.fill = { fgColor: { rgb: "1F2937" } };
-        cell.s.font = { bold: true, color: { rgb: "FFFFFF" } };
+        cell.s.fill = { fgColor:{ rgb:"1F2937" } };
+        cell.s.font = { bold:true, color:{ rgb:"FFFFFF" } };
+        cell.s.alignment = {
+          vertical:"center",
+          horizontal:"center",
+          wrapText:true
+        };
+        continue;
       }
 
-      if(R > 0){
-        if(C === 2 || C === 3){
-          const agreed = data[R - 1]["¿Acordado?"] === "Sí";
-          cell.s.fill = {
-            fgColor: {
-              rgb: agreed ? "DCFCE7" : "FEE2E2"
-            }
-          };
-          cell.s.font = {
-            color: {
-              rgb: agreed ? "166534" : "991B1B"
-            }
-          };
-        }
+      const article = articles[R - 1];
 
-        if(C === 5 || C === 6){
-          cell.s.fill = { fgColor: { rgb: "FEE2E2" } };
-          cell.s.font = { color: { rgb: "991B1B" } };
+      if(C === 2 || C === 3){
+        if(article.isAgreed){
+          cell.s.fill = { fgColor:{ rgb:"DCFCE7" } };
+          cell.s.font = { bold:true, color:{ rgb:"166534" } };
+        }else{
+          cell.s.fill = { fgColor:{ rgb:"FEE2E2" } };
+          cell.s.font = { bold:true, color:{ rgb:"991B1B" } };
         }
+      }
 
-        if(C === 7 || C === 8){
-          cell.s.fill = { fgColor: { rgb: "DBEAFE" } };
-          cell.s.font = { color: { rgb: "1E40AF" } };
-        }
+      if(C === 4){
+        cell.s.fill = { fgColor:{ rgb:"F3F4F6" } };
+        cell.s.font = { color:{ rgb:"111827" } };
+      }
 
-        if(C === 9 || C === 10){
-          cell.s.fill = { fgColor: { rgb: "DCFCE7" } };
-          cell.s.font = { color: { rgb: "166534" } };
-        }
+      if(C === 5 || C === 6){
+        cell.s.fill = { fgColor:{ rgb:"FEE2E2" } };
+        cell.s.font = { color:{ rgb:"991B1B" } };
+      }
+
+      if(C === 7 || C === 8){
+        cell.s.fill = { fgColor:{ rgb:"DBEAFE" } };
+        cell.s.font = { color:{ rgb:"1E40AF" } };
+      }
+
+      if(C === 9 || C === 10){
+        cell.s.fill = { fgColor:{ rgb:"DCFCE7" } };
+        cell.s.font = { color:{ rgb:"166534" } };
       }
     }
   }
+
+  ws["!autofilter"] = {
+    ref: XLSX.utils.encode_range(range)
+  };
 
   XLSX.utils.book_append_sheet(wb, ws, "Negociación convenio");
 
@@ -1177,6 +1169,7 @@ function exportExcel(){
 
   showSaveStatus("Excel .xlsx exportado correctamente");
 }
+
 function getArticleLabel(a){
   const n = a.number || "Sin número";
   const t = a.title ? " — " + a.title : "";
@@ -1194,11 +1187,6 @@ function escapeHTML(value){
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;");
-}
-
-function excelCell(value){
-  return escapeHTML(value)
-    .replaceAll("\n","<br>");
 }
 
 function showSaveStatus(text){
