@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>I Convenio Cardtronics Spain S.L.U. — Negociación</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;
+  --paper:#ffffff;
+  --ink:#111827;
+  --muted:#6b7280;
+  --line:#d1d5db;
+  --comite-bg:#dbeafe;
+  --comite-border:#3b82f6;
+  --comite-text:#1e40af;
+  --empresa-bg:#fee2e2;
+  --empresa-border:#ef4444;
+  --empresa-text:#991b1b;
+  --acuerdo-bg:#dcfce7;
+  --acuerdo-border:#22c55e;
+  --acuerdo-text:#166534;
+  --delete-bg:#f3f4f6;
+  --delete-text:#6b7280;
+  --pendiente-bg:#fee2e2;
+  --pendiente-border:#dc2626;
+  --pendiente-text:#991b1b;
+  --historial-bg:#fef3c7;
+  --historial-border:#f59e0b;
+  --historial-text:#92400e;
+  --dark:#1f2937;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
+header{
+  background:var(--dark);
+  color:white;
+  padding:18px 22px;
+}
+header h1{
+  margin:0;
+  font-size:22px;
+}
+header p{
+  margin:6px 0 0;
+  color:#d1d5db;
+  font-size:14px;
+}
+main{
+  max-width:1300px;
+  margin:0 auto;
+  padding:18px;
+}
+.panel{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.exportRow{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  width:100%;
+}
+.exportBox{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:center;
+  background:#f9fafb;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+}
+.exportBox select{
+  width:100%;
+  min-width:0;
+}
+.mainActions{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;
+  width:100%;
+}
+button{
+  border:none;
+  border-radius:10px;
+  padding:10px 13px;
+  cursor:pointer;
+  font-weight:bold;
+  font-family:inherit;
+  background:#111827;
+  color:white;
+}
+button:hover{opacity:.9}
+button.secondary{
+  background:#e5e7eb;
+  color:#111827;
+}
+button.red{background:#dc2626}
+button.green{background:#16a34a}
+button.blue{background:#2563eb}
+button.yellow{background:#ca8a04}
+button.gray{background:#4b5563}
+input,
+select,
+textarea{
+  font-family:inherit;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  background:white;
+  color:var(--ink);
+}
+select{min-width:220px}
+input[type="date"]{min-width:150px}
+textarea{
+  width:100%;
+  min-height:130px;
+  resize:vertical;
+  line-height:1.45;
+  font-size:15px;
+}
+label{
+  display:block;
+  font-weight:bold;
+  margin-bottom:6px;
+}
+.small{
+  color:var(--muted);
+  font-size:13px;
+}
+.articleHeader{
+  display:grid;
+  grid-template-columns:180px 1fr 190px 170px;
+  gap:12px;
+  align-items:end;
+}
+.articleTitleBox{
+  background:#f9fafb;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  margin-top:14px;
+}
+.articleTitleBox h2{
+  margin:0;
+  font-size:22px;
+}
+.articleTitleBox p{
+  margin:8px 0 0;
+  color:var(--muted);
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.statusBadge{
+  display:inline-block;
+  padding:7px 11px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:bold;
+}
+.statusBadge.ok{
+  background:var(--acuerdo-bg);
+  color:var(--acuerdo-text);
+  border:1px solid var(--acuerdo-border);
+}
+.statusBadge.no{
+  background:var(--pendiente-bg);
+  color:var(--pendiente-text);
+  border:1px solid var(--pendiente-border);
+}
+.indexList{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(125px,1fr));
+  gap:8px;
+  max-height:300px;
+  overflow:auto;
+  padding:4px;
+}
+.indexItem{
+  border:2px solid;
+  border-radius:10px;
+  padding:8px;
+  cursor:pointer;
+  font-size:13px;
+  min-height:58px;
+}
+.indexItem:hover{filter:brightness(.97)}
+.indexItem.active{outline:3px solid #111827}
+.indexItem.acordado{
+  background:var(--acuerdo-bg);
+  color:var(--acuerdo-text);
+  border-color:var(--acuerdo-border);
+}
+.indexItem.pendiente{
+  background:var(--pendiente-bg);
+  color:var(--pendiente-text);
+  border-color:var(--pendiente-border);
+}
+.checkBox{
+  background:white;
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  height:42px;
+}
+.checkBox input{
+  width:20px;
+  height:20px;
+  accent-color:#16a34a;
+}
+.checkBox span{font-weight:bold}
+.summaryCounters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
+.counterBox{
+  padding:9px 12px;
+  border-radius:999px;
+  font-weight:bold;
+  font-size:13px;
+}
+.counterBox.green{
+  background:var(--acuerdo-bg);
+  color:var(--acuerdo-text);
+  border:1px solid var(--acuerdo-border);
+}
+.counterBox.red{
+  background:var(--pendiente-bg);
+  color:var(--pendiente-text);
+  border:1px solid var(--pendiente-border);
+}
+.counterBox.dark{
+  background:#e5e7eb;
+  color:#111827;
+  border:1px solid #9ca3af;
+}
+.hidden{display:none}
+.importBox{
+  background:#fff7ed;
+  border:1px solid #fdba74;
+}
+.importBox textarea{
+  min-height:300px;
+  background:#fff;
+}
+.baseTextPanel{
+  background:#f9fafb;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  margin-top:12px;
+}
+.editorPanel{
+  border:2px solid #111827;
+  border-radius:16px;
+  background:white;
+  padding:14px;
+}
+.editorToolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:12px;
+}
+.workingEditor{
+  min-height:340px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px;
+  background:#ffffff;
+  line-height:1.55;
+  font-size:16px;
+  outline:none;
+  white-space:pre-wrap;
+}
+.workingEditor:focus{
+  border-color:#111827;
+  box-shadow:0 0 0 3px rgba(17,24,39,.12);
+}
+.mark-comite{
+  background:var(--comite-bg);
+  color:var(--comite-text);
+  border-bottom:2px solid var(--comite-border);
+  padding:1px 3px;
+  border-radius:4px;
+}
+.mark-empresa{
+  background:var(--empresa-bg);
+  color:var(--empresa-text);
+  border-bottom:2px solid var(--empresa-border);
+  padding:1px 3px;
+  border-radius:4px;
+}
+.mark-acuerdo{
+  background:var(--acuerdo-bg);
+  color:var(--acuerdo-text);
+  border-bottom:2px solid var(--acuerdo-border);
+  padding:1px 3px;
+  border-radius:4px;
+  font-weight:600;
+}
+.mark-delete{
+  background:var(--delete-bg);
+  color:var(--delete-text);
+  text-decoration:line-through;
+  padding:1px 3px;
+  border-radius:4px;
+}
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+  font-size:13px;
+}
+.legend span{
+  display:inline-block;
+  padding:6px 9px;
+  border-radius:999px;
+  font-weight:bold;
+}
+.noteGrid{
+  display:grid;
+  grid-template-columns:180px 170px 1fr;
+  gap:12px;
+  align-items:end;
+}
+.historyPanel{
+  background:#fffbeb;
+  border:1px solid var(--historial-border);
+}
+.historyGroup{
+  border:1px solid var(--historial-border);
+  border-radius:14px;
+  background:#ffffff;
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.historySummary{
+  background:var(--historial-bg);
+  color:var(--historial-text);
+  padding:12px;
+  font-weight:bold;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  cursor:pointer;
+  list-style:none;
+}
+.historySummary::-webkit-details-marker{
+  display:none;
+}
+.historySummary::before{
+  content:"▶";
+  margin-right:8px;
+}
+.historyGroup[open] .historySummary::before{
+  content:"▼";
+}
+.historySummaryLeft{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.historySummaryRight{
+  font-size:13px;
+  opacity:.9;
+}
+.historyItem{
+  border-top:1px solid var(--line);
+  padding:12px;
+}
+.historyMeta{
+  font-weight:bold;
+  color:var(--historial-text);
+  margin-bottom:8px;
+}
+.historySnapshot{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  background:#f9fafb;
+  max-height:180px;
+  overflow:auto;
+  white-space:pre-wrap;
+  line-height:1.45;
+}
+.historyNote{
+  margin-top:8px;
+  padding:10px;
+  background:#f9fafb;
+  border:1px solid var(--line);
+  border-radius:10px;
+  white-space:pre-wrap;
+}
+.helpBox{
+  background:#eef2ff;
+  border:1px solid #818cf8;
+  border-radius:14px;
+  padding:12px;
+  margin-top:12px;
+  color:#1e1b4b;
+  font-size:13px;
+  line-height:1.45;
+}
+@media(max-width:950px){
+  .articleHeader,
+  .noteGrid{
+    grid-template-columns:1fr;
+  }
+  .exportBox{
+    grid-template-columns:1fr;
+  }
+  select{width:100%}
+  .toolbar{align-items:stretch}
+  button,
+  input,
+  select{
+    width:100%;
+  }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>I Convenio Colectivo de Cardtronics Spain, S.L.U.</h1>
+  <p>Herramienta de negociación: texto vivo, marcas por parte, acuerdos, histórico final y exportación limpia.</p>
+</header>
+<main>
+<section class="panel">
+  <div class="exportRow">
+    <div class="exportBox">
+      <select id="exportSelect">
+        <option value="excel">Excel completo .xlsx</option>
+        <option value="wordComplete">Word completo</option>
+        <option value="wordPending">Word solo pendientes</option>
+        <option value="wordAgreed">Word solo acordados</option>
+        <option value="wordFinal">Word convenio final cerrado</option>
+        <option value="json">Descargar JSON</option>
+      </select>
+      <button class="green" onclick="runSelectedExport()">Exportar</button>
+    </div>
+    <div class="mainActions">
+      <button class="secondary" onclick="saveInBrowser()">Guardar</button>
+      <button class="secondary" onclick="document.getElementById('jsonFile').click()">Cargar JSON</button>
+      <button class="yellow" onclick="toggleImportPanel()">Pegar convenio / extraer artículos</button>
+      <button class="blue" onclick="addArticle()">Añadir artículo</button>
+      <button class="yellow" onclick="duplicateCurrentArticle()">Duplicar artículo</button>
+      <button class="red" onclick="deleteCurrentArticle()">Borrar artículo</button>
+      <button class="red" onclick="clearBrowserData()">Borrar datos</button>
+    </div>
+    <input id="jsonFile" type="file" accept=".json" class="hidden" onchange="importJSON(event)" />
+  </div>
+  <p class="small" id="saveStatus">
+    Los cambios se guardan automáticamente en este navegador.
+  </p>
+</section>
+<section id="importPanel" class="panel importBox hidden">
+  <h2 style="margin-top:0;">Pegar texto completo del convenio o propuesta base</h2>
+  <p class="small">
+    Pega aquí el texto completo. El sistema buscará encabezados tipo
+    <strong>Artículo 1. Objeto.</strong>. El texto extraído se guardará como texto vigente/base y como texto inicial de trabajo.
+  </p>
+  <textarea id="rawConventionText" placeholder="Pega aquí el texto completo..."></textarea>
+  <div class="toolbar" style="margin-top:12px;">
+    <button class="green" onclick="extractArticlesFromText(true)">Extraer y sustituir artículos</button>
+    <button class="blue" onclick="extractArticlesFromText(false)">Extraer y añadir a los existentes</button>
+    <button class="secondary" onclick="document.getElementById('rawConventionText').value=''">Vaciar cuadro</button>
+    <button class="red" onclick="toggleImportPanel()">Cerrar</button>
+  </div>
+</section>
+<section class="panel">
+  <div class="toolbar">
+    <label for="articleSelect" style="margin:0;">Elegir artículo:</label>
+    <select id="articleSelect" onchange="selectArticle(this.value)"></select>
+    <input
+      id="searchBox"
+      type="search"
+      placeholder="Buscar artículo..."
+      oninput="renderIndex()"
+      style="flex:1;min-width:220px;"
+    />
+    <select id="filterAgreement" onchange="renderIndex()" style="min-width:180px;">
+      <option value="">Ver todos</option>
+      <option value="pendiente">Solo pendientes</option>
+      <option value="acordado">Solo acordados</option>
+    </select>
+  </div>
+  <div class="summaryCounters">
+    <span id="totalCounter" class="counterBox dark"></span>
+    <span id="pendingCounter" class="counterBox red"></span>
+    <span id="agreedCounter" class="counterBox green"></span>
+  </div>
+  <div id="indexList" class="indexList" style="margin-top:14px;"></div>
+</section>
+<section class="panel">
+  <div class="articleHeader">
+    <div>
+      <label>Número</label>
+      <input id="articleNumber" type="text" placeholder="Artículo 1" oninput="updateCurrent('number', this.value)" />
+    </div>
+    <div>
+      <label>Título del artículo</label>
+      <input id="articleTitle" type="text" placeholder="Objeto, Jornada, Vacaciones..." oninput="updateCurrent('title', this.value)" style="width:100%;" />
+    </div>
+    <div>
+      <label>Estado</label>
+      <select id="articleStatus" onchange="updateCurrent('status', this.value)" style="min-width:0;width:100%;">
+        <option value="Pendiente">Pendiente</option>
+        <option value="En negociación">En negociación</option>
+        <option value="Propuesta comité">Propuesta comité</option>
+        <option value="Respuesta empresa">Respuesta empresa</option>
+        <option value="Acordado">Acordado</option>
+        <option value="Bloqueado">Bloqueado</option>
+      </select>
+    </div>
+    <div>
+      <label>Acordado</label>
+      <div class="checkBox">
+        <input id="agreedCheck" type="checkbox" onchange="toggleAgreement(this.checked)" />
+        <span>Sí</span>
+      </div>
+    </div>
+  </div>
+  <div class="articleTitleBox">
+    <h2 id="screenArticleTitle">Artículo</h2>
+    <p>
+      <span id="screenArticleSubtitle">Selecciona un artículo del índice o crea uno nuevo.</span>
+      <span id="screenAgreementBadge" class="statusBadge no">Pendiente</span>
+    </p>
+  </div>
+</section>
+<section class="panel">
+  <div class="toolbar">
+    <button class="secondary" onclick="toggleBaseText()">Ver / ocultar texto vigente</button>
+    <button class="secondary" onclick="copyBaseToWorking()">Copiar texto vigente al texto en negociación</button>
+  </div>
+  <div id="baseTextPanel" class="baseTextPanel hidden">
+    <label>Texto vigente / texto base</label>
+    <textarea id="baseText" placeholder="Texto vigente o texto base de referencia..." oninput="updateCurrent('baseText', this.value)"></textarea>
+    <p class="small">Este texto queda como referencia. No se exporta en el documento principal salvo que el texto en negociación esté vacío.</p>
+  </div>
+</section>
+<section class="panel editorPanel">
+  <h2 style="margin-top:0;">Texto en negociación</h2>
+  <p class="small">
+    Trabaja sobre este texto. Selecciona una parte y marca si es propuesta del comité, respuesta de empresa, acuerdo o eliminación.
+  </p>
+  <div class="editorToolbar">
+    <button class="blue" onclick="markSelection('comite')">Marcar selección: Comité</button>
+    <button class="red" onclick="markSelection('empresa')">Marcar selección: Empresa</button>
+    <button class="green" onclick="markSelection('acuerdo')">Marcar selección: Acuerdo</button>
+    <button class="gray" onclick="markSelection('delete')">Marcar selección: Eliminado</button>
+    <button class="secondary" onclick="removeMarksFromSelection()">Quitar marca selección</button>
+  </div>
+  <div id="workingEditor" class="workingEditor" contenteditable="true" oninput="updateWorkingFromEditor()"></div>
+  <div class="legend">
+    <span class="mark-comite">Comité</span>
+    <span class="mark-empresa">Empresa</span>
+    <span class="mark-acuerdo">Acuerdo</span>
+    <span class="mark-delete">Eliminado</span>
+  </div>
+  <div class="helpBox">
+    <strong>Formato de tabla para exportar bien a Word:</strong><br>
+    [TABLA: Nombre de la tabla]<br>
+    Concepto | Comité | Empresa | Acuerdo<br>
+    Dieta | 14,5 € | 13,5 € | 14 €<br>
+    [FIN TABLA]<br><br>
+    También puedes seleccionar importes dentro de la tabla y marcarlos como Comité, Empresa, Acuerdo o Eliminado. Al exportar a Word, la celda conservará el color de la marca.
+  </div>
+</section>
+<section class="panel">
+  <div class="noteGrid">
+    <div>
+      <label>Última parte</label>
+      <select id="lastActor" onchange="updateCurrent('lastActor', this.value)">
+        <option value="Comité">Comité</option>
+        <option value="Empresa">Empresa</option>
+        <option value="Acuerdo">Acuerdo</option>
+        <option value="Mixta">Mixta</option>
+      </select>
+    </div>
+    <div>
+      <label>Fecha ronda</label>
+      <input id="lastDate" type="date" onchange="updateCurrent('lastDate', this.value)" />
+    </div>
+    <div>
+      <label>Última nota de negociación</label>
+      <textarea id="lastNote" placeholder="Ejemplo: Comité mantiene subida de dietas. Empresa acepta una parte y deja pendiente disponibilidad..." oninput="updateCurrent('lastNote', this.value)" style="min-height:80px;"></textarea>
+    </div>
+  </div>
+  <div class="toolbar" style="margin-top:12px;">
+    <button class="yellow" onclick="saveHistoryEntry()">Guardar ronda en histórico</button>
+    <button class="green" onclick="markAgreed()">Marcar artículo acordado</button>
+    <button class="red" onclick="markPending()">Marcar artículo pendiente</button>
+  </div>
+</section>
+<section class="panel historyPanel">
+  <h2 style="margin-top:0;">Histórico global de la negociación</h2>
+  <p class="small">
+    El histórico aparece agrupado por artículo y cerrado por defecto. Abre cada desplegable para ver la evolución de ese artículo. Puedes borrar una ronda concreta si te equivocas.
+  </p>
+  <div id="globalHistoryList"></div>
+</section>
+</main>
+<script>
+const STORAGE_KEY = "negociacion_cardtronics_texto_vivo_v7_marcas_tablas_celdas";
+let articles = [];
+let currentId = null;
+function createArticle(number = "", title = ""){
+  return {
+    id: makeId(),
+    number,
+    title,
+    status: "Pendiente",
+    isAgreed: false,
+    baseText: "",
+    workingHtml: "",
+    lastActor: "Comité",
+    lastDate: "",
+    lastNote: "",
+    history: []
+  };
+}
+function makeId(){
+  if(window.crypto && crypto.randomUUID){
+    return crypto.randomUUID();
+  }
+  return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
+function defaultArticles(){
+  const list = [];
+  for(let i = 1; i <= 60; i++){
+    list.push(createArticle("Artículo " + i, ""));
+  }
+  return list;
+}
+function normalizeArticle(a){
+  const normalized = {
+    ...createArticle(),
+    ...a,
+    isAgreed: Boolean(a.isAgreed || a.status === "Acordado"),
+    history: Array.isArray(a.history) ? a.history : []
+  };
+  if(!normalized.baseText && a.currentText){
+    normalized.baseText = a.currentText;
+  }
+  if(!normalized.workingHtml){
+    const fallback =
+      a.agreementText ||
+      a.committeeProposal ||
+      a.companyProposal ||
+      a.currentText ||
+      normalized.baseText ||
+      "";
+    normalized.workingHtml = textToHtml(fallback);
+  }
+  return normalized;
+}
+function loadFromBrowser(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved){
+    try{
+      articles = JSON.parse(saved).map(normalizeArticle);
+    }catch(e){
+      articles = defaultArticles();
+    }
+  }else{
+    articles = defaultArticles();
+  }
+  if(!articles || articles.length === 0){
+    articles = defaultArticles();
+  }
+  currentId = getSortedArticles()[0].id;
+  renderAll();
+  showSaveStatus("Datos cargados desde este navegador");
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
+  showSaveStatus("Guardado automáticamente en este navegador");
+}
+function saveInBrowser(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
+  showSaveStatus("Guardado manualmente en este navegador");
+  alert("Datos guardados en este navegador.");
+}
+function getCurrent(){
+  return articles.find(a => a.id === currentId) || getSortedArticles()[0];
+}
+function getSortedArticles(){
+  return [...articles].sort((a, b) => {
+    if(a.isAgreed === b.isAgreed){
+      return getArticleNumberValue(a.number) - getArticleNumberValue(b.number);
+    }
+    return a.isAgreed ? 1 : -1;
+  });
+}
+function getArticleNumberValue(value){
+  const match = String(value || "").match(/\d+/);
+  return match ? parseInt(match[0], 10) : 999999;
+}
+function renderAll(){
+  renderSelect();
+  renderIndex();
+  renderCurrent();
+  renderCounters();
+  renderGlobalHistory();
+}
+function renderSelect(){
+  const select = document.getElementById("articleSelect");
+  const sorted = getSortedArticles();
+  select.innerHTML = sorted.map(a => {
+    const mark = a.isAgreed ? "✅ " : "❌ ";
+    const name = mark + getArticleLabel(a);
+    return `<option value="${a.id}" ${a.id === currentId ? "selected" : ""}>${escapeHTML(name)}</option>`;
+  }).join("");
+  if(currentId){
+    select.value = currentId;
+  }
+}
+function renderIndex(){
+  const q = document.getElementById("searchBox").value.trim().toLowerCase();
+  const filter = document.getElementById("filterAgreement").value;
+  const box = document.getElementById("indexList");
+  const sorted = getSortedArticles();
+  const filtered = sorted.filter(a => {
+    const text = [
+      a.number,
+      a.title,
+      a.status,
+      a.baseText,
+      htmlToPlainText(a.workingHtml),
+      a.lastNote
+    ].join(" ").toLowerCase();
+    const matchesSearch = !q || text.includes(q);
+    let matchesFilter = true;
+    if(filter === "acordado"){
+      matchesFilter = a.isAgreed;
+    }
+    if(filter === "pendiente"){
+      matchesFilter = !a.isAgreed;
+    }
+    return matchesSearch && matchesFilter;
+  });
+  box.innerHTML = filtered.map(a => {
+    let cls = "indexItem " + (a.isAgreed ? "acordado" : "pendiente");
+    if(a.id === currentId){
+      cls += " active";
+    }
+    return `
+      <div class="${cls}" onclick="selectArticle('${a.id}')">
+        <strong>${a.isAgreed ? "✅" : "❌"} ${escapeHTML(a.number || "Sin nº")}</strong><br>
+        <span>${escapeHTML(a.title || (a.isAgreed ? "Acordado" : "Pendiente"))}</span>
+      </div>
+    `;
+  }).join("");
+  renderCounters();
+}
+function renderCounters(){
+  const total = articles.length;
+  const pending = articles.filter(a => !a.isAgreed).length;
+  const agreed = articles.filter(a => a.isAgreed).length;
+  document.getElementById("totalCounter").innerText = "Total: " + total;
+  document.getElementById("pendingCounter").innerText = "Pendientes: " + pending;
+  document.getElementById("agreedCounter").innerText = "Acordados: " + agreed;
+}
+function renderCurrent(){
+  const a = getCurrent();
+  if(!a) return;
+  document.getElementById("articleNumber").value = a.number || "";
+  document.getElementById("articleTitle").value = a.title || "";
+  document.getElementById("articleStatus").value = a.status || "Pendiente";
+  document.getElementById("agreedCheck").checked = Boolean(a.isAgreed);
+  document.getElementById("baseText").value = a.baseText || "";
+  document.getElementById("workingEditor").innerHTML = a.workingHtml || "";
+  document.getElementById("lastActor").value = a.lastActor || "Comité";
+  document.getElementById("lastDate").value = a.lastDate || "";
+  document.getElementById("lastNote").value = a.lastNote || "";
+  updateScreenHeaderOnly();
+  const select = document.getElementById("articleSelect");
+  if(select.value !== currentId){
+    select.value = currentId;
+  }
+}
+function selectArticle(id){
+  currentId = id;
+  renderAll();
+}
+function updateCurrent(field, value){
+  const a = getCurrent();
+  if(!a) return;
+  a[field] = value;
+  if(field === "status"){
+    if(value === "Acordado"){
+      a.isAgreed = true;
+    }else if(value === "Pendiente" || value === "Bloqueado" || value === "En negociación"){
+      a.isAgreed = false;
+    }
+  }
+  save();
+  renderSelect();
+  renderIndex();
+  renderCounters();
+  updateScreenHeaderOnly();
+}
+function updateWorkingFromEditor(){
+  const a = getCurrent();
+  if(!a) return;
+  a.workingHtml = document.getElementById("workingEditor").innerHTML;
+  save();
+  renderSelect();
+  renderIndex();
+  renderCounters();
+}
+function updateScreenHeaderOnly(){
+  const a = getCurrent();
+  if(!a) return;
+  document.getElementById("screenArticleTitle").innerText = getArticleLabel(a);
+  document.getElementById("screenArticleSubtitle").innerText = "Estado: " + (a.status || "Pendiente") + " · Última parte: " + (a.lastActor || "Comité");
+  const badge = document.getElementById("screenAgreementBadge");
+  document.getElementById("agreedCheck").checked = Boolean(a.isAgreed);
+  if(a.isAgreed){
+    badge.className = "statusBadge ok";
+    badge.innerText = "Acordado";
+  }else{
+    badge.className = "statusBadge no";
+    badge.innerText = "Pendiente";
+  }
+}
+function toggleBaseText(){
+  document.getElementById("baseTextPanel").classList.toggle("hidden");
+}
+function copyBaseToWorking(){
+  const a = getCurrent();
+  if(!a) return;
+  if(!a.baseText.trim()){
+    alert("No hay texto vigente/base para copiar.");
+    return;
+  }
+  if(!confirm("Esto sustituirá el texto en negociación por el texto vigente/base. ¿Continuar?")){
+    return;
+  }
+  a.workingHtml = textToHtml(a.baseText);
+  document.getElementById("workingEditor").innerHTML = a.workingHtml;
+  save();
+  renderAll();
+}
+function toggleAgreement(checked){
+  const a = getCurrent();
+  if(!a) return;
+  a.isAgreed = checked;
+  a.status = checked ? "Acordado" : "Pendiente";
+  save();
+  renderAll();
+}
+function markAgreed(){
+  toggleAgreement(true);
+}
+function markPending(){
+  toggleAgreement(false);
+}
+function markSelection(type){
+  const editor = document.getElementById("workingEditor");
+  editor.focus();
+  const selection = window.getSelection();
+  if(!selection || selection.rangeCount === 0 || selection.isCollapsed){
+    alert("Selecciona primero una parte del texto en negociación.");
+    return;
+  }
+  const range = selection.getRangeAt(0);
+  if(!editor.contains(range.commonAncestorContainer)){
+    alert("La selección debe estar dentro del texto en negociación.");
+    return;
+  }
+  const span = document.createElement("span");
+  if(type === "comite"){
+    span.className = "mark-comite";
+    setLastActorQuick("Comité");
+  }
+  if(type === "empresa"){
+    span.className = "mark-empresa";
+    setLastActorQuick("Empresa");
+  }
+  if(type === "acuerdo"){
+    span.className = "mark-acuerdo";
+    setLastActorQuick("Acuerdo");
+  }
+  if(type === "delete"){
+    span.className = "mark-delete";
+    setLastActorQuick("Mixta");
+  }
+  try{
+    const content = range.extractContents();
+    span.appendChild(content);
+    range.insertNode(span);
+    selection.removeAllRanges();
+    const afterRange = document.createRange();
+    afterRange.setStartAfter(span);
+    afterRange.collapse(true);
+    selection.addRange(afterRange);
+    updateWorkingFromEditor();
+  }catch(e){
+    alert("No se pudo marcar la selección. Prueba seleccionando menos texto.");
+  }
+}
+function removeMarksFromSelection(){
+  const editor = document.getElementById("workingEditor");
+  editor.focus();
+  const selection = window.getSelection();
+  if(!selection || selection.rangeCount === 0 || selection.isCollapsed){
+    alert("Selecciona primero una parte marcada.");
+    return;
+  }
+  const range = selection.getRangeAt(0);
+  if(!editor.contains(range.commonAncestorContainer)){
+    alert("La selección debe estar dentro del texto en negociación.");
+    return;
+  }
+  const fragment = range.extractContents();
+  const temp = document.createElement("div");
+  temp.appendChild(fragment);
+  temp.querySelectorAll(".mark-comite,.mark-empresa,.mark-acuerdo,.mark-delete").forEach(span => {
+    const parent = span.parentNode;
+    while(span.firstChild){
+      parent.insertBefore(span.firstChild, span);
+    }
+    parent.removeChild(span);
+  });
+  const cleanFragment = document.createDocumentFragment();
+  while(temp.firstChild){
+    cleanFragment.appendChild(temp.firstChild);
+  }
+  range.insertNode(cleanFragment);
+  selection.removeAllRanges();
+  updateWorkingFromEditor();
+}
+function setLastActorQuick(actor){
+  const a = getCurrent();
+  if(!a) return;
+  a.lastActor = actor;
+  a.lastDate = today();
+  document.getElementById("lastActor").value = actor;
+  document.getElementById("lastDate").value = a.lastDate;
+  save();
+  updateScreenHeaderOnly();
+}
+function saveHistoryEntry(){
+  const a = getCurrent();
+  if(!a) return;
+  const working = String(a.workingHtml || "").trim();
+  const note = String(a.lastNote || "").trim();
+  if(!working && !note){
+    alert("No hay texto en negociación ni nota para guardar en histórico.");
+    return;
+  }
+  const now = new Date();
+  const entry = {
+    id: makeId(),
+    savedAt: now.toISOString(),
+    savedAtText: now.toLocaleString("es-ES"),
+    actor: a.lastActor || "Comité",
+    date: a.lastDate || today(),
+    status: a.status || "Pendiente",
+    note: a.lastNote || "",
+    workingHtml: a.workingHtml || ""
+  };
+  if(!Array.isArray(a.history)){
+    a.history = [];
+  }
+  a.history.push(entry);
+  save();
+  renderGlobalHistory();
+  alert("Ronda guardada en histórico.");
+}
+function renderGlobalHistory(){
+  const box = document.getElementById("globalHistoryList");
+  if(!box) return;
+  const withHistory = getSortedArticles().filter(a => Array.isArray(a.history) && a.history.length > 0);
+  if(withHistory.length === 0){
+    box.innerHTML = `<p class="small">Todavía no hay rondas guardadas en el histórico.</p>`;
+    return;
+  }
+  box.innerHTML = withHistory.map(article => {
+    const historyHtml = article.history.map((h, index) => `
+      <div class="historyItem">
+        <div class="historyMeta">
+          Ronda ${index + 1} · ${escapeHTML(h.savedAtText || "")} · ${escapeHTML(h.actor || "")} · Estado: ${escapeHTML(h.status || "")}
+        </div>
+        <div class="historySnapshot">${sanitizeDisplayHtml(h.workingHtml || "")}</div>
+        ${
+          h.note
+            ? `<div class="historyNote"><strong>Nota:</strong><br>${escapeHTML(h.note)}</div>`
+            : ""
+        }
+        <div class="toolbar" style="margin-top:10px;">
+          <button class="red" onclick="deleteHistoryEntry('${article.id}', '${h.id}')">
+            Borrar esta ronda
+          </button>
+        </div>
+      </div>
+    `).join("");
+    return `
+      <details class="historyGroup">
+        <summary class="historySummary">
+          <span class="historySummaryLeft">
+            ${escapeHTML(getArticleLabel(article))}
+          </span>
+          <span class="historySummaryRight">
+            ${article.history.length} ronda(s)
+          </span>
+        </summary>
+        ${historyHtml}
+      </details>
+    `;
+  }).join("");
+}
+function deleteHistoryEntry(articleId, historyId){
+  const article = articles.find(a => a.id === articleId);
+  if(!article || !Array.isArray(article.history)){
+    alert("No se ha encontrado esta ronda del histórico.");
+    return;
+  }
+  const entry = article.history.find(h => h.id === historyId);
+  if(!entry){
+    alert("No se ha encontrado esta ronda del histórico.");
+    return;
+  }
+  const label = getArticleLabel(article);
+  const roundDate = entry.savedAtText || "";
+  if(!confirm("¿Seguro que quieres borrar esta ronda del histórico?\n\n" + label + "\n" + roundDate + "\n\nEsta acción no se puede deshacer.")){
+    return;
+  }
+  article.history = article.history.filter(h => h.id !== historyId);
+  save();
+  renderGlobalHistory();
+  alert("Ronda borrada del histórico.");
+}
+function addArticle(){
+  const nextNumber = getNextArticleNumber();
+  const number = prompt("Número del artículo:", "Artículo " + nextNumber);
+  if(number === null) return;
+  const title = prompt("Título del artículo:", "");
+  if(title === null) return;
+  const a = createArticle(number, title);
+  articles.push(a);
+  currentId = a.id;
+  save();
+  renderAll();
+}
+function getNextArticleNumber(){
+  const nums = articles
+    .map(a => getArticleNumberValue(a.number))
+    .filter(n => Number.isFinite(n) && n < 999999);
+  if(nums.length === 0) return 1;
+  return Math.max(...nums) + 1;
+}
+function duplicateCurrentArticle(){
+  const a = getCurrent();
+  if(!a) return;
+  const copy = {
+    ...a,
+    id: makeId(),
+    number: (a.number || "Artículo") + " bis",
+    status: "Pendiente",
+    isAgreed: false,
+    history: Array.isArray(a.history) ? JSON.parse(JSON.stringify(a.history)) : []
+  };
+  articles.push(copy);
+  currentId = copy.id;
+  save();
+  renderAll();
+}
+function deleteCurrentArticle(){
+  const a = getCurrent();
+  if(!a) return;
+  if(!confirm("¿Seguro que quieres borrar " + getArticleLabel(a) + "?")){
+    return;
+  }
+  articles = articles.filter(x => x.id !== a.id);
+  if(articles.length === 0){
+    articles = defaultArticles();
+  }
+  currentId = getSortedArticles()[0].id;
+  save();
+  renderAll();
+}
+function toggleImportPanel(){
+  document.getElementById("importPanel").classList.toggle("hidden");
+}
+function extractArticlesFromText(replaceExisting){
+  const raw = document.getElementById("rawConventionText").value.trim();
+  if(!raw){
+    alert("Pega primero el texto completo.");
+    return;
+  }
+  const extracted = parseConventionArticles(raw);
+  if(extracted.length === 0){
+    alert("No se han encontrado artículos. Revisa que el texto tenga encabezados como: Artículo 1. Objeto.");
+    return;
+  }
+  if(replaceExisting){
+    if(!confirm("Se sustituirán todos los artículos actuales por los " + extracted.length + " artículos extraídos. ¿Continuar?")){
+      return;
+    }
+    articles = extracted;
+  }else{
+    articles = articles.concat(extracted);
+  }
+  currentId = getSortedArticles()[0].id;
+  save();
+  renderAll();
+  alert("Artículos extraídos correctamente: " + extracted.length);
+}
+function parseConventionArticles(text){
+  let clean = text
+    .replace(/\r/g, "")
+    .replace(/\u00a0/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/BOLETÍN OFICIAL DEL ESTADO[\s\S]*?Verificable en https:\/\/www\.boe\.es/g, "")
+    .replace(/Núm\.\s+\d+[\s\S]*?cve:\s*BOE-[A-Z0-9\-]+/g, "")
+    .replace(/Verificable en https:\/\/www\.boe\.es/g, "")
+    .replace(/\n{3,}/g, "\n\n");
+  const regex = /(^|\n)\s*Artículo\s+(\d+[A-Za-zºª\-\.]*)\.?\s*([^\n]*)/g;
+  const matches = [];
+  let match;
+  while((match = regex.exec(clean)) !== null){
+    matches.push({
+      index: match.index + match[1].length,
+      number: match[2].trim(),
+      title: cleanTitle(match[3] || "")
+    });
+  }
+  const result = [];
+  for(let i = 0; i < matches.length; i++){
+    const start = matches[i].index;
+    const end = i < matches.length - 1 ? matches[i + 1].index : clean.length;
+    let block = clean.slice(start, end).trim();
+    block = block.replace(/^Artículo\s+\d+[A-Za-zºª\-\.]*\.?\s*[^\n]*/i, "").trim();
+    const article = createArticle("Artículo " + matches[i].number.replace(/\.$/, ""), matches[i].title);
+    article.baseText = block;
+    article.workingHtml = textToHtml(block);
+    result.push(article);
+  }
+  return result;
+}
+function cleanTitle(title){
+  return String(title || "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/^[-–—:\s]+/, "")
+    .replace(/\.$/, "")
+    .trim();
+}
+/* EXPORTADOR */
+function runSelectedExport(){
+  const value = document.getElementById("exportSelect").value;
+  if(value === "excel") exportExcel();
+  if(value === "wordComplete") exportWordMode("complete");
+  if(value === "wordPending") exportWordMode("pending");
+  if(value === "wordAgreed") exportWordMode("agreed");
+  if(value === "wordFinal") exportWordMode("final");
+  if(value === "json") exportJSON();
+}
+/* JSON */
+function exportJSON(){
+  const data = {
+    app: "Negociacion I Convenio Cardtronics Spain SLU",
+    version: "7.0-marcas-tablas-celdas",
+    exportedAt: new Date().toISOString(),
+    articles: articles
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0, 10);
+  link.href = url;
+  link.download = "negociacion_cardtronics_texto_vivo_" + date + ".json";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showSaveStatus("JSON descargado correctamente");
+}
+function importJSON(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const imported = JSON.parse(e.target.result);
+      let importedArticles;
+      if(Array.isArray(imported)){
+        importedArticles = imported;
+      }else if(Array.isArray(imported.articles)){
+        importedArticles = imported.articles;
+      }else{
+        throw new Error("Formato JSON no válido");
+      }
+      articles = importedArticles.map(normalizeArticle);
+      if(articles.length === 0){
+        articles = defaultArticles();
+      }
+      currentId = getSortedArticles()[0].id;
+      save();
+      renderAll();
+      alert("JSON cargado correctamente.");
+      showSaveStatus("JSON cargado y guardado en este navegador");
+    }catch(err){
+      alert("No se pudo cargar el JSON. Revisa que sea el archivo correcto.");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+function clearBrowserData(){
+  if(!confirm("Esto borrará los datos guardados en este navegador. ¿Seguro?")){
+    return;
+  }
+  localStorage.removeItem(STORAGE_KEY);
+  articles = defaultArticles();
+  currentId = getSortedArticles()[0].id;
+  renderAll();
+  showSaveStatus("Datos del navegador borrados");
+}
+/* EXCEL */
+function exportExcel(){
+  const sorted = getSortedArticles();
+  const headers = [
+    "Artículo",
+    "Título",
+    "¿Acordado?",
+    "Estado",
+    "Texto en negociación",
+    "Última parte",
+    "Fecha última ronda",
+    "Última nota",
+    "Nº rondas histórico"
+  ];
+  const data = [
+    headers,
+    ...sorted.map(a => [
+      a.number || "",
+      a.title || "",
+      a.isAgreed ? "Sí" : "No",
+      a.status || "",
+      htmlToPlainText(a.workingHtml || ""),
+      a.lastActor || "",
+      a.lastDate || "",
+      a.lastNote || "",
+      Array.isArray(a.history) ? a.history.length : 0
+    ])
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [
+    {wch:18},
+    {wch:28},
+    {wch:14},
+    {wch:18},
+    {wch:90},
+    {wch:18},
+    {wch:18},
+    {wch:60},
+    {wch:18}
+  ];
+  ws["!rows"] = [
+    {hpt:26},
+    ...sorted.map(() => ({hpt:110}))
+  ];
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  for(let R = range.s.r; R <= range.e.r; R++){
+    for(let C = range.s.c; C <= range.e.c; C++){
+      const cellAddress = XLSX.utils.encode_cell({r:R,c:C});
+      const cell = ws[cellAddress];
+      if(!cell) continue;
+      cell.s = {
+        alignment:{
+          vertical:"top",
+          wrapText:true
+        },
+        border:{
+          top:{style:"thin",color:{rgb:"999999"}},
+          bottom:{style:"thin",color:{rgb:"999999"}},
+          left:{style:"thin",color:{rgb:"999999"}},
+          right:{style:"thin",color:{rgb:"999999"}}
+        }
+      };
+      if(R === 0){
+        cell.s.fill = {fgColor:{rgb:"1F2937"}};
+        cell.s.font = {bold:true,color:{rgb:"FFFFFF"}};
+        cell.s.alignment = {
+          vertical:"center",
+          horizontal:"center",
+          wrapText:true
+        };
+        continue;
+      }
+      const article = sorted[R - 1];
+      if(C === 2 || C === 3){
+        if(article.isAgreed){
+          cell.s.fill = {fgColor:{rgb:"DCFCE7"}};
+          cell.s.font = {bold:true,color:{rgb:"166534"}};
+        }else{
+          cell.s.fill = {fgColor:{rgb:"FEE2E2"}};
+          cell.s.font = {bold:true,color:{rgb:"991B1B"}};
+        }
+      }
+    }
+  }
+  ws["!autofilter"] = {
+    ref: XLSX.utils.encode_range(range)
+  };
+  XLSX.utils.book_append_sheet(wb, ws, "Negociación");
+  const historySheet = buildExcelHistorySheet(sorted);
+  if(historySheet){
+    XLSX.utils.book_append_sheet(wb, historySheet, "Histórico");
+  }
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, "negociacion_cardtronics_texto_vivo_" + date + ".xlsx");
+  showSaveStatus("Excel .xlsx exportado correctamente");
+}
+function buildExcelHistorySheet(sorted){
+  const rows = [];
+  rows.push([
+    "Artículo",
+    "Título",
+    "Ronda",
+    "Fecha guardado",
+    "Parte",
+    "Fecha ronda",
+    "Estado",
+    "Nota",
+    "Texto"
+  ]);
+  sorted.forEach(article => {
+    if(Array.isArray(article.history)){
+      article.history.forEach((h, index) => {
+        rows.push([
+          article.number || "",
+          article.title || "",
+          index + 1,
+          h.savedAtText || "",
+          h.actor || "",
+          h.date || "",
+          h.status || "",
+          h.note || "",
+          htmlToPlainText(h.workingHtml || "")
+        ]);
+      });
+    }
+  });
+  if(rows.length <= 1){
+    return null;
+  }
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws["!cols"] = [
+    {wch:18},
+    {wch:28},
+    {wch:10},
+    {wch:24},
+    {wch:18},
+    {wch:18},
+    {wch:18},
+    {wch:60},
+    {wch:90}
+  ];
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  for(let R = range.s.r; R <= range.e.r; R++){
+    for(let C = range.s.c; C <= range.e.c; C++){
+      const address = XLSX.utils.encode_cell({r:R,c:C});
+      const cell = ws[address];
+      if(!cell) continue;
+      cell.s = {
+        alignment:{
+          vertical:"top",
+          wrapText:true
+        },
+        border:{
+          top:{style:"thin",color:{rgb:"999999"}},
+          bottom:{style:"thin",color:{rgb:"999999"}},
+          left:{style:"thin",color:{rgb:"999999"}},
+          right:{style:"thin",color:{rgb:"999999"}}
+        }
+      };
+      if(R === 0){
+        cell.s.fill = {fgColor:{rgb:"1F2937"}};
+        cell.s.font = {bold:true,color:{rgb:"FFFFFF"}};
+      }
+    }
+  }
+  return ws;
+}
+/* WORD */
+async function exportWordMode(mode){
+  const {
+    Document,
+    Packer,
+    Paragraph,
+    TextRun,
+    HeadingLevel,
+    AlignmentType,
+    PageBreak,
+    BorderStyle,
+    ShadingType,
+    Table,
+    TableRow,
+    TableCell,
+    WidthType
+  } = docx;
+  const sorted = getSortedArticles();
+  const pending = sorted.filter(a => !a.isAgreed);
+  const agreed = sorted.filter(a => a.isAgreed);
+  if(mode === "pending" && pending.length === 0){
+    alert("No hay artículos pendientes para exportar.");
+    return;
+  }
+  if((mode === "agreed" || mode === "final") && agreed.length === 0){
+    alert("No hay artículos acordados para exportar.");
+    return;
+  }
+  const children = [];
+  function addParagraph(text = "", options = {}){
+    children.push(
+      new Paragraph({
+        spacing:{
+          before:options.before ?? 0,
+          after:options.after ?? 140,
+          line:options.line ?? 276
+        },
+        alignment:options.alignment || AlignmentType.JUSTIFIED,
+        shading:options.fill ? {
+          type:ShadingType.CLEAR,
+          color:"auto",
+          fill:options.fill
+        } : undefined,
+        border:options.border ? {
+          bottom:{
+            color:options.border,
+            space:1,
+            style:BorderStyle.SINGLE,
+            size:6
+          }
+        } : undefined,
+        children:[
+          new TextRun({
+            text:String(text || ""),
+            bold:options.bold || false,
+            italics:options.italics || false,
+            size:options.size || 22,
+            color:options.color || "111827",
+            strike:options.strike || false
+          })
+        ]
+      })
+    );
+  }
+  function addTitle(text){
+    children.push(
+      new Paragraph({
+        alignment:AlignmentType.CENTER,
+        spacing:{after:260},
+        children:[
+          new TextRun({
+            text,
+            bold:true,
+            size:34,
+            color:"111827"
+          })
+        ]
+      })
+    );
+  }
+  function addSubtitle(text){
+    children.push(
+      new Paragraph({
+        alignment:AlignmentType.CENTER,
+        spacing:{after:160},
+        children:[
+          new TextRun({
+            text,
+            size:24,
+            color:"374151"
+          })
+        ]
+      })
+    );
+  }
+  function addSectionTitle(text, color, fill){
+    children.push(
+      new Paragraph({
+        heading:HeadingLevel.HEADING_1,
+        spacing:{before:260,after:180},
+        shading:{type:ShadingType.CLEAR,color:"auto",fill},
+        children:[
+          new TextRun({
+            text,
+            bold:true,
+            size:28,
+            color
+          })
+        ]
+      })
+    );
+  }
+  function makeLegendRow(label, description, color, fill, strike){
+    return new TableRow({
+      children:[
+        new TableCell({
+          width:{size:18,type:WidthType.PERCENTAGE},
+          shading:{type:ShadingType.CLEAR,color:"auto",fill},
+          margins:{top:120,bottom:120,left:120,right:120},
+          children:[
+            new Paragraph({
+              alignment:AlignmentType.CENTER,
+              children:[
+                new TextRun({
+                  text:label,
+                  bold:true,
+                  color,
+                  size:22,
+                  strike:!!strike
+                })
+              ]
+            })
+          ]
+        }),
+        new TableCell({
+          width:{size:82,type:WidthType.PERCENTAGE},
+          margins:{top:120,bottom:120,left:120,right:120},
+          children:[
+            new Paragraph({
+              children:[
+                new TextRun({
+                  text:description,
+                  color:"111827",
+                  size:22
+                })
+              ]
+            })
+          ]
+        })
+      ]
+    });
+  }
+  function addNegotiationLegend(){
+    addSectionTitle("LEYENDA DE MARCAS DE NEGOCIACIÓN", "111827", "E5E7EB");
+    children.push(
+      new Table({
+        width:{size:100,type:WidthType.PERCENTAGE},
+        rows:[
+          makeLegendRow("Comité","Texto introducido, modificado o defendido por la representación social.","1E40AF","DBEAFE",false),
+          makeLegendRow("Empresa","Respuesta, contrapropuesta o modificación planteada por la empresa.","991B1B","FEE2E2",false),
+          makeLegendRow("Acuerdo","Redacción aceptada por ambas partes o texto consolidado.","166534","DCFCE7",false),
+          makeLegendRow("Tachado","Contenido eliminado, sustituido o descartado durante la negociación.","6B7280","F3F4F6",true)
+        ]
+      })
+    );
+    addParagraph("", {after:200});
+  }
+  function addFinalCleanNote(){
+    addSectionTitle("NOTA SOBRE EL TEXTO FINAL", "111827", "E5E7EB");
+    addParagraph("Este documento recoge únicamente los artículos marcados como acordados. El texto se exporta limpio, sin marcas de negociación, sin colores y sin texto tachado.", {
+      size:22,
+      color:"111827"
+    });
+    addParagraph("Las marcas internas de comité, empresa, acuerdo o eliminación solo se conservan en los documentos de seguimiento de negociación y en el histórico.", {
+      size:22,
+      color:"374151",
+      italics:true
+    });
+  }
+  function addArticleTitle(article, agreedArticle){
+    const fill = agreedArticle ? "DCFCE7" : "FEE2E2";
+    const color = agreedArticle ? "166534" : "991B1B";
+    const statusText = agreedArticle ? "ACORDADO" : "PENDIENTE";
+    children.push(
+      new Paragraph({
+        heading:HeadingLevel.HEADING_2,
+        spacing:{before:240,after:120},
+        shading:{type:ShadingType.CLEAR,color:"auto",fill},
+        children:[
+          new TextRun({
+            text:`${article.number || "Artículo"}${article.title ? ". " + article.title : ""}`,
+            bold:true,
+            size:26,
+            color
+          }),
+          new TextRun({
+            text:`   [${statusText}]`,
+            bold:true,
+            size:22,
+            color
+          })
+        ]
+      })
+    );
+  }
+  function addFinalArticleTitle(article){
+    children.push(
+      new Paragraph({
+        heading:HeadingLevel.HEADING_2,
+        spacing:{before:240,after:120},
+        children:[
+          new TextRun({
+            text:`${article.number || "Artículo"}${article.title ? ". " + article.title : ""}`,
+            bold:true,
+            size:26,
+            color:"111827"
+          })
+        ]
+      })
+    );
+  }
+  function addLabel(text, color, fill){
+    children.push(
+      new Paragraph({
+        spacing:{before:160,after:80},
+        shading:{type:ShadingType.CLEAR,color:"auto",fill},
+        children:[
+          new TextRun({
+            text,
+            bold:true,
+            size:22,
+            color
+          })
+        ]
+      })
+    );
+  }
+  function addCleanText(text){
+    const clean = String(text || "").trim();
+    if(!clean){
+      addParagraph("Sin texto.", {
+        italics:true,
+        color:"6B7280"
+      });
+      return;
+    }
+    clean
+      .replace(/\r/g, "")
+      .split(/\n{2,}/)
+      .map(p => p.trim())
+      .filter(Boolean)
+      .forEach(paragraph => {
+        addParagraph(paragraph.replace(/\n/g, " "), {
+          size:21,
+          after:130
+        });
+      });
+  }
+  function cleanHtmlToTextPreservingBreaks(html, removeDeleted){
+    const temp = document.createElement("div");
+    temp.innerHTML = html || "";
+    if(removeDeleted){
+      temp.querySelectorAll(".mark-delete").forEach(el => el.remove());
+    }
+    temp.querySelectorAll("br").forEach(br => {
+      br.replaceWith(document.createTextNode("\n"));
+    });
+    temp.querySelectorAll("div,p").forEach(el => {
+      el.appendChild(document.createTextNode("\n\n"));
+    });
+    let text = temp.innerText || temp.textContent || "";
+    text = text
+      .replace(/\r/g, "")
+      .replace(/\u00a0/g, " ")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n[ \t]+/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .replace(/([a-záéíóúñ])\.([A-ZÁÉÍÓÚÑ])/g, "$1. $2")
+      .trim();
+    return text;
+  }
+  function htmlToMarkedLines(html){
+    let raw = String(html || "");
+    raw = raw
+      .replace(/\r/g, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(div|p)>/gi, "</$1>\n")
+      .replace(/<(div|p)[^>]*>/gi, "")
+      .replace(/<\/(div|p)>/gi, "")
+      .replace(/&nbsp;/gi, " ");
+    return raw
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line => htmlToPlainText(line).trim() !== "");
+  }
+  function parsePlainTable(title, body){
+    const lines = htmlToMarkedLines(body);
+    let origin = "";
+    let date = "";
+    const rowLines = [];
+    lines.forEach(line => {
+      const plain = htmlToPlainText(line).trim();
+      const originMatch = plain.match(/^\[ORIGEN:\s*([^\]]+)\]$/i);
+      const dateMatch = plain.match(/^\[FECHA:\s*([^\]]+)\]$/i);
+      if(originMatch){
+        origin = originMatch[1].trim();
+      }else if(dateMatch){
+        date = dateMatch[1].trim();
+      }else if(line.includes("|")){
+        rowLines.push(line);
+      }
+    });
+    const rows = rowLines.map(line =>
+      line.split("|").map(cell => cell.trim())
+    );
+    const maxCols = rows.reduce((max, row) => Math.max(max, row.length), 0);
+    const normalizedRows = rows.map(row => {
+      const copy = [...row];
+      while(copy.length < maxCols){
+        copy.push("");
+      }
+      return copy;
+    });
+    return {
+      title:htmlToPlainText(title).trim() || String(title || "").trim(),
+      origin,
+      date,
+      rows:normalizedRows
+    };
+  }
+  function cellToWordRuns(cellHtml, isHeader){
+    const temp = document.createElement("div");
+    temp.innerHTML = String(cellHtml || "");
+    const runs = [];
+    function getStyle(node){
+      if(node.nodeType !== Node.ELEMENT_NODE){
+        return {};
+      }
+      const el = node;
+      if(el.classList.contains("mark-comite")){
+        return {
+          color:"1E40AF",
+          bold:false
+        };
+      }
+      if(el.classList.contains("mark-empresa")){
+        return {
+          color:"991B1B",
+          bold:false
+        };
+      }
+      if(el.classList.contains("mark-acuerdo")){
+        return {
+          color:"166534",
+          bold:true
+        };
+      }
+      if(el.classList.contains("mark-delete")){
+        return {
+          color:"6B7280",
+          strike:true
+        };
+      }
+      return {};
+    }
+    function walk(node, inheritedStyle = {}){
+      if(node.nodeType === Node.TEXT_NODE){
+        const text = node.textContent || "";
+        if(text){
+          runs.push(
+            new TextRun({
+              text,
+              bold:isHeader || inheritedStyle.bold || false,
+              color:inheritedStyle.color || "111827",
+              size:18,
+              strike:inheritedStyle.strike || false
+            })
+          );
+        }
+        return;
+      }
+      if(node.nodeType !== Node.ELEMENT_NODE){
+        return;
+      }
+      const ownStyle = {
+        ...inheritedStyle,
+        ...getStyle(node)
+      };
+      Array.from(node.childNodes).forEach(child => walk(child, ownStyle));
+    }
+    Array.from(temp.childNodes).forEach(child => walk(child, {}));
+    if(runs.length === 0){
+      runs.push(
+        new TextRun({
+          text:htmlToPlainText(cellHtml) || String(cellHtml || ""),
+          bold:isHeader,
+          size:18,
+          color:"111827"
+        })
+      );
+    }
+    return runs;
+  }
+  function addWordTableFromPlain(table){
+    if(!table || !Array.isArray(table.rows) || table.rows.length === 0){
+      return;
+    }
+    if(table.title){
+      addParagraph("Tabla: " + table.title, {
+        bold:true,
+        size:21,
+        color:"111827",
+        after:80
+      });
+    }
+    if(table.origin || table.date){
+      addParagraph(
+        [
+          table.origin ? "Origen: " + table.origin : "",
+          table.date ? "Fecha: " + table.date : ""
+        ].filter(Boolean).join(" · "),
+        {
+          bold:true,
+          size:20,
+          color:"6B7280",
+          after:80
+        }
+      );
+    }
+    const maxCols = table.rows.reduce((max, row) => Math.max(max, row.length), 0);
+    const colWidth = Math.floor(100 / Math.max(maxCols, 1));
+    const wordRows = table.rows.map((row, rowIndex) => {
+      const cells = [];
+      for(let c = 0; c < maxCols; c++){
+        const cellValue = row[c] || "";
+        cells.push(
+          new TableCell({
+            width:{
+              size:colWidth,
+              type:WidthType.PERCENTAGE
+            },
+            shading: rowIndex === 0 ? {
+              type:ShadingType.CLEAR,
+              color:"auto",
+              fill:"E5E7EB"
+            } : undefined,
+            margins:{
+              top:80,
+              bottom:80,
+              left:80,
+              right:80
+            },
+            children:[
+              new Paragraph({
+                alignment:AlignmentType.CENTER,
+                children:cellToWordRuns(cellValue, rowIndex === 0)
+              })
+            ]
+          })
+        );
+      }
+      return new TableRow({
+        children:cells
+      });
+    });
+    children.push(
+      new Table({
+        width:{
+          size:100,
+          type:WidthType.PERCENTAGE
+        },
+        rows:wordRows
+      })
+    );
+    addParagraph("", {
+      after:180
+    });
+  }
+  function addContentWithTablesFromPlainText(text){
+    const raw = String(text || "");
+    const regex = /\[TABLA:\s*([^\]]+)\]([\s\S]*?)\[FIN TABLA\]/gi;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    while((match = regex.exec(raw)) !== null){
+      if(match.index > lastIndex){
+        parts.push({
+          type:"text",
+          content:raw.slice(lastIndex, match.index)
+        });
+      }
+      parts.push({
+        type:"table",
+        table:parsePlainTable(match[1], match[2])
+      });
+      lastIndex = regex.lastIndex;
+    }
+    if(lastIndex < raw.length){
+      parts.push({
+        type:"text",
+        content:raw.slice(lastIndex)
+      });
+    }
+    let hasContent = false;
+    parts.forEach(part => {
+      if(part.type === "text"){
+        const plainText = String(part.content || "").trim();
+        if(plainText){
+          hasContent = true;
+          addCleanText(plainText);
+        }
+      }
+      if(part.type === "table"){
+        hasContent = true;
+        addWordTableFromPlain(part.table);
+      }
+    });
+    if(!hasContent){
+      addParagraph("Sin texto.", {
+        italics:true,
+        color:"6B7280"
+      });
+    }
+  }
+  function addStyledHtmlOnly(html){
+    const paragraphs = htmlToWordParagraphRuns(html);
+    if(paragraphs.length === 0){
+      addParagraph("Sin texto.", {
+        italics:true,
+        color:"6B7280"
+      });
+      return;
+    }
+    paragraphs.forEach(runs => {
+      children.push(
+        new Paragraph({
+          spacing:{after:110,line:276},
+          alignment:AlignmentType.JUSTIFIED,
+          children:runs
+        })
+      );
+    });
+  }
+  function splitHtmlAndTables(html){
+    const raw = String(html || "");
+    const regex = /\[TABLA:\s*([^\]]+)\]([\s\S]*?)\[FIN TABLA\]/gi;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    while((match = regex.exec(raw)) !== null){
+      if(match.index > lastIndex){
+        parts.push({
+          type:"html",
+          content:raw.slice(lastIndex, match.index)
+        });
+      }
+      parts.push({
+        type:"table",
+        table:parsePlainTable(match[1], match[2])
+      });
+      lastIndex = regex.lastIndex;
+    }
+    if(lastIndex < raw.length){
+      parts.push({
+        type:"html",
+        content:raw.slice(lastIndex)
+      });
+    }
+    if(parts.length === 0){
+      parts.push({
+        type:"html",
+        content:raw
+      });
+    }
+    return parts;
+  }
+  function addStyledHtml(html){
+    const rawHtml = String(html || "");
+    if(!rawHtml.trim()){
+      addParagraph("Sin texto.", {
+        italics:true,
+        color:"6B7280"
+      });
+      return;
+    }
+    const parts = splitHtmlAndTables(rawHtml);
+    let hasContent = false;
+    parts.forEach(part => {
+      if(part.type === "html"){
+        const cleanHtml = String(part.content || "").trim();
+        if(cleanHtml){
+          hasContent = true;
+          addStyledHtmlOnly(cleanHtml);
+        }
+      }
+      if(part.type === "table"){
+        hasContent = true;
+        addWordTableFromPlain(part.table);
+      }
+    });
+    if(!hasContent){
+      addParagraph("Sin texto.", {
+        italics:true,
+        color:"6B7280"
+      });
+    }
+  }
+  function addFinalContentWithTables(html){
+    const cleanText = cleanHtmlToTextPreservingBreaks(html, true);
+    addContentWithTablesFromPlainText(cleanText);
+  }
+  function addArticleNegotiation(article){
+    addArticleTitle(article, article.isAgreed);
+    addLabel("Último texto trabajado", "111827", "F3F4F6");
+    addStyledHtml(article.workingHtml || "");
+    if(article.lastNote){
+      addLabel("Última nota de negociación", "374151", "F9FAFB");
+      addParagraph(article.lastNote, {
+        size:21
+      });
+    }
+  }
+  function addArticleFinal(article){
+    addFinalArticleTitle(article);
+    addFinalContentWithTables(article.workingHtml || "");
+  }
+  function addIndexSection(title, list){
+    addParagraph(title, {
+      bold:true,
+      size:24,
+      after:120,
+      border:"9CA3AF"
+    });
+    if(list.length === 0){
+      addParagraph("No hay artículos en este apartado.", {
+        italics:true,
+        color:"6B7280"
+      });
+      return;
+    }
+    list.forEach(a => {
+      addParagraph(`${a.number || "Artículo"}${a.title ? ". " + a.title : ""}`, {
+        size:21,
+        after:70
+      });
+    });
+  }
+  function addGlobalHistory(list){
+    const withHistory = list.filter(a => Array.isArray(a.history) && a.history.length > 0);
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    addSectionTitle("HISTÓRICO DE NEGOCIACIÓN", "92400E", "FEF3C7");
+    addNegotiationLegend();
+    if(withHistory.length === 0){
+      addParagraph("No hay rondas guardadas en el histórico.", {
+        italics:true,
+        color:"6B7280"
+      });
+      return;
+    }
+    withHistory.forEach(article => {
+      children.push(
+        new Paragraph({
+          heading:HeadingLevel.HEADING_2,
+          spacing:{before:240,after:120},
+          children:[
+            new TextRun({
+              text:`${article.number || "Artículo"}${article.title ? ". " + article.title : ""}`,
+              bold:true,
+              size:25,
+              color:"92400E"
+            })
+          ]
+        })
+      );
+      article.history.forEach((h, index) => {
+        addLabel(`Ronda ${index + 1} · ${h.savedAtText || ""} · ${h.actor || ""} · Estado: ${h.status || ""}`, "92400E", "FEF3C7");
+        if(h.note){
+          addParagraph("Nota: " + h.note, {
+            bold:false,
+            size:21,
+            color:"374151"
+          });
+        }
+        addStyledHtml(h.workingHtml || "");
+      });
+    });
+  }
+  const todayText = new Date().toLocaleDateString("es-ES", {
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric"
+  });
+  let exportList = sorted;
+  let fileBaseName = "i_convenio_cardtronics_negociacion";
+  if(mode === "pending"){
+    exportList = pending;
+    fileBaseName = "i_convenio_cardtronics_pendientes";
+  }
+  if(mode === "agreed"){
+    exportList = agreed;
+    fileBaseName = "i_convenio_cardtronics_acordados";
+  }
+  if(mode === "final"){
+    exportList = agreed;
+    fileBaseName = "i_convenio_cardtronics_texto_final";
+  }
+  if(mode === "final"){
+    addTitle("I CONVENIO COLECTIVO DE CARDTRONICS SPAIN, S.L.U.");
+    addSubtitle("Texto final acordado");
+    addParagraph("Documento generado automáticamente con los artículos marcados como acordados.", {
+      alignment:AlignmentType.CENTER,
+      italics:true,
+      color:"6B7280"
+    });
+    addParagraph("Fecha de generación: " + todayText, {
+      alignment:AlignmentType.CENTER,
+      color:"6B7280"
+    });
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    addFinalCleanNote();
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    addSectionTitle("ÍNDICE", "111827", "E5E7EB");
+    addIndexSection("Artículos del convenio final", exportList);
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    exportList.forEach(addArticleFinal);
+    return saveWordDoc(Document, Packer, children, fileBaseName);
+  }
+  addTitle("I CONVENIO COLECTIVO DE CARDTRONICS SPAIN, S.L.U.");
+  if(mode === "pending"){
+    addSubtitle("Artículos pendientes de acuerdo");
+  }else if(mode === "agreed"){
+    addSubtitle("Artículos acordados");
+  }else{
+    addSubtitle("Documento de seguimiento de negociación");
+  }
+  addParagraph("Documento generado automáticamente a partir de la herramienta de negociación.", {
+    alignment:AlignmentType.CENTER,
+    italics:true,
+    color:"6B7280"
+  });
+  addParagraph("Fecha de generación: " + todayText, {
+    alignment:AlignmentType.CENTER,
+    color:"6B7280"
+  });
+  children.push(new Paragraph({children:[new PageBreak()]}));
+  addNegotiationLegend();
+  children.push(new Paragraph({children:[new PageBreak()]}));
+  addSectionTitle("ÍNDICE", "111827", "E5E7EB");
+  if(mode === "complete"){
+    addIndexSection("Artículos pendientes de acuerdo", pending);
+    addIndexSection("Artículos acordados", agreed);
+  }else if(mode === "pending"){
+    addIndexSection("Artículos pendientes de acuerdo", pending);
+  }else if(mode === "agreed"){
+    addIndexSection("Artículos acordados", agreed);
+  }
+  children.push(new Paragraph({children:[new PageBreak()]}));
+  if(mode === "complete"){
+    if(pending.length > 0){
+      addSectionTitle("ARTÍCULOS PENDIENTES DE ACUERDO", "991B1B", "FEE2E2");
+      pending.forEach(addArticleNegotiation);
+    }
+    if(agreed.length > 0){
+      children.push(new Paragraph({children:[new PageBreak()]}));
+      addSectionTitle("ARTÍCULOS ACORDADOS", "166534", "DCFCE7");
+      agreed.forEach(addArticleNegotiation);
+    }
+  }else{
+    exportList.forEach(addArticleNegotiation);
+  }
+  addGlobalHistory(exportList);
+  return saveWordDoc(Document, Packer, children, fileBaseName);
+}
+async function saveWordDoc(Document, Packer, children, fileBaseName){
+  const doc = new Document({
+    creator:"Herramienta de negociación del I Convenio Cardtronics Spain, S.L.U.",
+    title:fileBaseName,
+    description:"Documento generado desde herramienta de negociación de convenio",
+    sections:[
+      {
+        properties:{
+          page:{
+            margin:{
+              top:1440,
+              right:900,
+              bottom:1440,
+              left:900
+            }
+          }
+        },
+        children
+      }
+    ]
+  });
+  const blob = await Packer.toBlob(doc);
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0,10);
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = fileBaseName + "_" + date + ".docx";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showSaveStatus("Word .docx exportado correctamente");
+}
+/* CONVERSIÓN HTML A WORD */
+function htmlToWordParagraphRuns(html){
+  const { TextRun } = docx;
+  const temp = document.createElement("div");
+  temp.innerHTML = html || "";
+  const paragraphs = [];
+  let currentRuns = [];
+  function flush(){
+    if(currentRuns.length > 0){
+      paragraphs.push(currentRuns);
+      currentRuns = [];
+    }
+  }
+  function styleForNode(node){
+    if(node.nodeType !== Node.ELEMENT_NODE){
+      return {};
+    }
+    const el = node;
+    if(el.classList.contains("mark-comite")){
+      return {
+        color:"1E40AF",
+        bold:false
+      };
+    }
+    if(el.classList.contains("mark-empresa")){
+      return {
+        color:"991B1B",
+        bold:false
+      };
+    }
+    if(el.classList.contains("mark-acuerdo")){
+      return {
+        color:"166534",
+        bold:true
+      };
+    }
+    if(el.classList.contains("mark-delete")){
+      return {
+        color:"6B7280",
+        strike:true
+      };
+    }
+    return {};
+  }
+  function addText(text, style){
+    if(!text) return;
+    const parts = String(text).split(/\n/);
+    parts.forEach((part, index) => {
+      if(index > 0){
+        flush();
+      }
+      if(part){
+        currentRuns.push(
+          new TextRun({
+            text:part,
+            size:21,
+            color:style.color || "111827",
+            bold:style.bold || false,
+            strike:style.strike || false
+          })
+        );
+      }
+    });
+  }
+  function walk(node, inheritedStyle = {}){
+    if(node.nodeType === Node.TEXT_NODE){
+      addText(node.textContent, inheritedStyle);
+      return;
+    }
+    if(node.nodeType !== Node.ELEMENT_NODE){
+      return;
+    }
+    const el = node;
+    const ownStyle = {
+      ...inheritedStyle,
+      ...styleForNode(el)
+    };
+    if(el.tagName === "BR"){
+      flush();
+      return;
+    }
+    if(["DIV","P"].includes(el.tagName) && currentRuns.length > 0){
+      flush();
+    }
+    Array.from(el.childNodes).forEach(child => walk(child, ownStyle));
+    if(["DIV","P"].includes(el.tagName)){
+      flush();
+    }
+  }
+  Array.from(temp.childNodes).forEach(child => walk(child, {}));
+  flush();
+  return paragraphs;
+}
+/* UTILIDADES */
+function getArticleLabel(a){
+  const n = a.number || "Sin número";
+  const t = a.title ? " — " + a.title : "";
+  return n + t;
+}
+function today(){
+  return new Date().toISOString().slice(0,10);
+}
+function textToHtml(text){
+  return escapeHTML(String(text || "")).replace(/\n/g, "<br>");
+}
+function htmlToPlainText(html){
+  const temp = document.createElement("div");
+  temp.innerHTML = html || "";
+  return temp.innerText || "";
+}
+function sanitizeDisplayHtml(html){
+  const temp = document.createElement("div");
+  temp.innerHTML = html || "";
+  temp.querySelectorAll("script,style,iframe,object,embed").forEach(el => el.remove());
+  Array.from(temp.querySelectorAll("*")).forEach(el => {
+    const allowed = ["mark-comite","mark-empresa","mark-acuerdo","mark-delete"];
+    el.className = Array.from(el.classList).filter(c => allowed.includes(c)).join(" ");
+    Array.from(el.attributes).forEach(attr => {
+      if(attr.name !== "class"){
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  return temp.innerHTML;
+}
+function escapeHTML(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+function showSaveStatus(text){
+  const el = document.getElementById("saveStatus");
+  if(!el) return;
+  const now = new Date();
+  const time = now.toLocaleTimeString("es-ES", {
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  });
+  el.innerText = text + " · " + time;
+}
+loadFromBrowser();
+</script>
+</body>
+</html>
